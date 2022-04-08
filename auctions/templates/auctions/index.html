@@ -3,5 +3,10 @@
 {% block body %}
     <h2>Active Listings</h2>
 
-    TODO
+    Here is the listing of auctions (WIP):
+
+    {% for auction in auctions %}
+			<li>{{ auction.title }} for  {{ auction.startingbid }} Euros, from {{ auction.category }} category</li>
+	{% endfor %}
+
 {% endblock %}
