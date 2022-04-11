@@ -5,8 +5,10 @@
 
     Here is the listing of auctions (WIP):
 
+    <p></p>
+
     {% for auction in auctions %}
-			<li>{{ auction.title }} for  {{ auction.startingbid }} Euros, from {{ auction.category }} category</li>
+			<li>{{ auction.title }} for  {{ auction.startingbid }} Euros. Category is {{ auction.category}}</li>
 	{% endfor %}
 
 {% endblock %}
