@@ -10,5 +10,7 @@
     {% for auction in auctions %}
 			<li>{{ auction.title }} for  {{ auction.startingbid }} Euros. Category is {{ auction.category}}</li>
 	{% endfor %}
+    <br>
+    Do you want to sell an item? Create <a href="{% url 'createlisting' %}">here a new listing</a> 
 
 {% endblock %}

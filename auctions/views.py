@@ -3,6 +3,7 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from datetime import datetime 
 
 from .models import User, Auction
 
@@ -63,3 +64,34 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
+
+# Adding a nre view for user to create a new listing
+
+def createlisting(request):
+    if request.method == "POST":
+        # Retrieving data from the user / user passed in automatically as {{ user }} / {{ user.id }}
+        newtitle = request.POST["title"]
+        newdescription = request.POST["description"]
+        newstartingbid = request.POST["startingbid"]
+        newimageurl = request.POST["imageurl"]
+        newcategory = request.POST["category"]
+
+        # Save user listing in database, @ Auction Model, only with mandatory fields
+        newauction = Auction(title=newtitle, description=newdescription, startingbid=newstartingbid, image=newimageurl, category=newcategory)
+        newauction.save()
+
+        #Test prnt only
+        #return render(request, "auctions/createlisting.html", {
+        #   "title": newtitle,
+        #    "description": newdescription,
+        #    "startingbid": newstartingbid,
+        #    "imageurl": newimageurl,
+        #    "category": newcategory
+        # })
+
+        return render(request, "auctions/index.html", {
+            "auctions": Auction.objects.all()
+        })
+
+    else:
+        return render(request, "auctions/createlisting.html")

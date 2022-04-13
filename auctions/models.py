@@ -44,7 +44,6 @@ class Comment(models.Model):
         return f"Comment number {self.id}. Made by {self.userid} on {self.auctionid}: '{self.comment}', commented on {self.dateofbid}"
 
 
-
 # TO DO
 # add "Categories" model
 # add category watchlist
