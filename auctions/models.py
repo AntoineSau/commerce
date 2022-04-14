@@ -14,6 +14,7 @@ class User(AbstractUser):
         return f"User Name: {self.username}. User ID number: {self.id}."
 
 class Auction(models.Model):
+    userid = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user")
     title = models.CharField(max_length=50)
     description = models.TextField(max_length=500)
     startingbid = models.FloatField()

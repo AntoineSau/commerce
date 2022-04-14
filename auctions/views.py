@@ -70,6 +70,9 @@ def register(request):
 def createlisting(request):
     if request.method == "POST":
         # Retrieving data from the user / user passed in automatically as {{ user }} / {{ user.id }}
+        currentuserid = request.user
+        currentuserid = currentuserid.id
+        currentuserid = User.objects.get(id=currentuserid)
         newtitle = request.POST["title"]
         newdescription = request.POST["description"]
         newstartingbid = request.POST["startingbid"]
@@ -77,7 +80,7 @@ def createlisting(request):
         newcategory = request.POST["category"]
 
         # Save user listing in database, @ Auction Model, only with mandatory fields
-        newauction = Auction(title=newtitle, description=newdescription, startingbid=newstartingbid, image=newimageurl, category=newcategory)
+        newauction = Auction(userid=currentuserid, title=newtitle, description=newdescription, startingbid=newstartingbid, image=newimageurl, category=newcategory)
         newauction.save()
 
         #Test prnt only

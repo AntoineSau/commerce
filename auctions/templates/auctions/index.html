@@ -8,7 +8,8 @@
     <p></p>
 
     {% for auction in auctions %}
-			<li>{{ auction.title }} for  {{ auction.startingbid }} Euros. Category is {{ auction.category}}</li>
+			<li>{{ auction.title }} for  {{ auction.startingbid }} Euros. Category is {{ auction.category}}, 
+                UPLOADED by user with ID -> {{ auction.userid.id }}</li>
 	{% endfor %}
     <br>
     Do you want to sell an item? Create <a href="{% url 'createlisting' %}">here a new listing</a> 
