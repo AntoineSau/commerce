@@ -7,7 +7,7 @@
 
     <!-- Looping over all auctions-->
     {% for auction in auctions %}
-
+    Click <a href="{% url 'auction' auction.id %}">here</a> to see the aution's page
         <!-- Adapting content displayed in function of what optional fields have been added or not -->
         {% if auction.category and auction.image%}
             <div class="border border-secondary rounded">

@@ -98,3 +98,20 @@ def createlisting(request):
 
     else:
         return render(request, "auctions/createlisting.html")
+
+def auction(request, auction_id):
+    auction = Auction.objects.get(id=auction_id)
+    
+    # if auction does not exit, forward to index Django will raise a DoesNotExist exception.!!!!!
+    if auction is None:
+        return render(request, "auctions/index.html", {
+            "auctions": Auction.objects.all()
+        })
+        
+    # If not, display auction's page
+    else:
+        return render(request, "auctions/auction.html", {
+            "auction": auction
+        })
+
+        

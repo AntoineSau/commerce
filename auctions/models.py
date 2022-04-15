@@ -49,5 +49,3 @@ class Comment(models.Model):
 # add "Categories" model
 # add category watchlist
 # Link models manay ot many
-# Cat img https://steamuserimages-a.akamaihd.net/ugc/1644340994747007967/853B20CD7694F5CF40E83AAC670572A3FE1E3D35/
-# Lama img https://ih1.redbubble.net/image.1036920113.4491/st,small,845x845-pad,1000x1000,f8f8f8.u1.jpg 
