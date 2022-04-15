@@ -3,7 +3,7 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from datetime import datetime 
+from datetime import datetime
 
 from .models import User, Auction
 
@@ -100,18 +100,21 @@ def createlisting(request):
         return render(request, "auctions/createlisting.html")
 
 def auction(request, auction_id):
-    auction = Auction.objects.get(id=auction_id)
     
-    # if auction does not exit, forward to index Django will raise a DoesNotExist exception.!!!!!
-    if auction is None:
-        return render(request, "auctions/index.html", {
-            "auctions": Auction.objects.all()
-        })
-        
-    # If not, display auction's page
-    else:
+    
+    try:
+        auction = Auction.objects.get(id=auction_id)
         return render(request, "auctions/auction.html", {
             "auction": auction
         })
+
+    except Auction.DoesNotExist:
+        return render(request, "auctions/index.html", {
+            "auctions": Auction.objects.all(),
+            "message": "This auction was not found! Please check manually below"
+        })
+
+    # if auction does not exit, forward to index Django will raise a DoesNotExist exception.!!!!!
+    
 
         

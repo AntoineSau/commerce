@@ -5,6 +5,12 @@
 
     <p></p>
 
+    <!-- Message sayign the manual access to an auction did not work-->
+    {% if message %}
+        <p></p>
+     <div style="color: red;">{{ message }}</div>
+        <p></p>
+    {% endif %}
     <!-- Looping over all auctions-->
     {% for auction in auctions %}
     Click <a href="{% url 'auction' auction.id %}">here</a> to see the aution's page
