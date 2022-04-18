@@ -5,129 +5,70 @@
 
     <p></p>
 
-    <!-- Message sayign the manual access to an auction did not work-->
+    <!-- Message saying the manual access to an auction did not work-->
     {% if message %}
-        <p></p>
      <div style="color: red;">{{ message }}</div>
-        <p></p>
+     <p></p>
     {% endif %}
-    <!-- Looping over all auctions-->
+   
+    <!-- Looping over all auctions and display their content-->
     {% for auction in auctions %}
-    Click <a href="{% url 'auction' auction.id %}">here</a> to see the aution's page
-        <!-- Adapting content displayed in function of what optional fields have been added or not -->
-        {% if auction.category and auction.image%}
-            <div class="border border-secondary rounded">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-4">
+
+        <!-- Creating a tab  which content depends on type of auction-->
+        <div class="border border-secondary rounded">
+            <div class="container">
+                <div class="row">
+                    <!-- "Left side" -->
+                    <div class="col-4">
+                        <!-- Display auction's image if it exists -->
+                        {% if auction.image %}
                             <img src="{{ auction.image }}" alt="Image for {{ auction.title }}" style="height: 100%; width: 100%; object-fit: contain">
-                        </div>
-                        <div class="col-8">
-                            <h1><b>{{ auction.title }}</b></h1>
-                            <p></p>
+                        <!-- Display "missing image" image if auciton does´t have image -->
+                        {% else %}
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg " alt="No Image here" style="height: 100%; width: 100%; object-fit: contain">
+                        {% endif %}
+                    </div>
+                    <!-- "Right side" -->
+                    <div class="col-8">
+                        <!-- Displaying title with link to the auction's page -->
+                        <h1><a href="{% url 'auction' auction.id %}">{{ auction.title }}</a></h1>
+                        <p></p>
+                        
+                        <!-- If the auction has a category, display it -->
+                        {% if auction.category %}
                             Category: {{ auction.category }}
-                            <p></p>
-                            Uploaded by "{{ auction.userid.username }}"
-                            <p></p>
-                            Item description: <i>{{ auction.description }}</i>
-                            <p></p>
-                            Initial bid: "{{ auction.startingbid }}" Euros / CORRECT TO CURRENT PRICE!   
-                            <p></p> 
-                            PRICE: TODO            
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <p></p>
-        {% elif auction.image %}
-        <div class="border border-secondary rounded">
-            <div class="container">
-                <div class="row">
-                    <div class="col-4">
-                        <img src="{{ auction.image }}" alt="Image for {{ auction.title }}" style="height: 100%; width: 100%; object-fit: contain">
-                    </div>
-                    <div class="col-8">
-                        <h1><b>{{ auction.title }}</b></h1>
-                        <p>
-                        Category: <i>Not specified</i>
-                        </p>
+                        <!-- If not, display a general statement -->
+                        {% else %}
+                            <i>Listing category was not defined by the user</i>
+                        <!-- Close if loop -->
+                        {% endif %}
                         <p></p>
-                        Uploaded by "{{ auction.userid.username }}"
-                        <p></p>
-                        Item description: <i>{{ auction.description }}</i>
-                        <p></p>
-                        Initial bid: "{{ auction.startingbid }}" Euros / CORRECT TO CURRENT PRICE!   
-                        <p></p> 
-                        PRICE: TODO            
-                    </div>
-                </div>
-            </div>
-        </div>
-            <p></p>
 
-        {% elif auction.category %}
-        <div class="border border-secondary rounded">
-            <div class="container">
-                <div class="row">
-                    <div class="col-4">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg " alt="No Image here" style="height: 100%; width: 100%; object-fit: contain">
-                    </div>
-                    <div class="col-8">
-                        <h1><b>{{ auction.title }}</b></h1>
-                        <p></p>
-                        Category: {{ auction.category }}
-                        <p></p>
                         Uploaded by "{{ auction.userid.username }}"
                         <p></p>
                         Item description: <i>{{ auction.description }}</i>
                         <p></p>
-                        Initial bid: "{{ auction.startingbid }}" Euros / CORRECT TO CURRENT PRICE!   
+                        Initial bid: "{{ auction.startingbid }}" Euros   
                         <p></p> 
-                        PRICE: TODO            
+                        Current bid: TODO            
                     </div>
                 </div>
             </div>
         </div>
         <p></p>
-            
-        {% else %}
-        <div class="border border-secondary rounded">
-            <div class="container">
-                <div class="row">
-                    <div class="col-4">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg " alt="No Image here" style="height: 100%; width: 100%; object-fit: contain">
-                    </div>
-                    <div class="col-8">
-                        <h1><b>{{ auction.title }}</b></h1>
-                        <p></p>
-                        Category: <i>Not specified</i>
-                        <p></p>
-                        Uploaded by "{{ auction.userid.username }}"
-                        <p></p>
-                        Item description: <i>{{ auction.description }}</i>
-                        <p></p>
-                        Initial bid: "{{ auction.startingbid }}" Euros / CORRECT TO CURRENT PRICE!   
-                        <p></p> 
-                        PRICE: TODO            
-                    </div>
-                </div>
-            </div>
-        </div>
-        <p></p>
-            
-        {% endif %}
-
+        
     <!-- Adding possibility that there is NO auction -->
     {% empty %}
         <li>There are currently no auction!</li>
 
+    <!-- Finishing loop over auctions -->
     {% endfor %}
-    <br>
-    Do you want to sell an item? Create <a href="{% url 'createlisting' %}">here a new listing</a> 
+        <br>
+        Do you want to sell an item? Create <a href="{% url 'createlisting' %}">here a new listing</a> 
 
 {% endblock %}
 
-<!-- Images 
+<!-- Back up for images 
     Cat img https://steamuserimages-a.akamaihd.net/ugc/1644340994747007967/853B20CD7694F5CF40E83AAC670572A3FE1E3D35/
     Lama img https://ih1.redbubble.net/image.1036920113.4491/st,small,845x845-pad,1000x1000,f8f8f8.u1.jpg
     NO IMG: https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg 

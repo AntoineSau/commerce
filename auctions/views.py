@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from datetime import datetime
 
-from .models import User, Auction
+from .models import Bid, User, Auction
 
 
 def index(request):
@@ -100,19 +100,65 @@ def createlisting(request):
         return render(request, "auctions/createlisting.html")
 
 def auction(request, auction_id):
-    
-    
-    try:
-        auction = Auction.objects.get(id=auction_id)
-        return render(request, "auctions/auction.html", {
-            "auction": auction
-        })
+    if request.method == "POST":
 
-    except Auction.DoesNotExist:
-        return render(request, "auctions/index.html", {
-            "auctions": Auction.objects.all(),
-            "message": "This auction was not found! Please check manually below"
-        })
+        try:
+            auction = Auction.objects.get(id=auction_id)
+            initialbid = auction.startingbid
+            
+            auction_id = str(auction_id)
+
+            newbid = int(request.POST["bid"])
+            
+            # TEST comparing bid and intitial bid:
+            if newbid > initialbid:
+                answerok = "Thanks, your had been taken into account!"
+                answerno = None
+                
+                # Check which user is logged in
+                currentuserid = request.user
+                currentuserid = currentuserid.id
+                currentuserid = User.objects.get(id=currentuserid)
+
+                # Register new bid
+                newbid = Bid(auctionid=auction, userid=currentuserid, bid=newbid)
+                newbid.save()
+
+            elif newbid < initialbid:
+                answerno = "ERROR, please place higher bid!"
+                answerok = None
+            return render(request, "auctions/auction.html", {
+                "auction": auction,
+                "bid": newbid,
+                "answerok": answerok,
+                "answerno": answerno,
+                "auction_id": auction_id
+            })
+
+        except Auction.DoesNotExist:
+            return render(request, "auctions/index.html", {
+                "auctions": Auction.objects.all(),
+                "message": "This auction was not found! Please check manually below"
+            })
+
+    else:
+        try:
+            auction = Auction.objects.get(id=auction_id)
+
+            #TO DO!!! Retrieve current highest bid fot this item!
+            auction_id = int(auction_id)
+            otherbid = "TODO"
+
+            return render(request, "auctions/auction.html", {
+                "auction": auction,
+                "otherbid": otherbid
+            })
+
+        except Auction.DoesNotExist:
+            return render(request, "auctions/index.html", {
+                "auctions": Auction.objects.all(),
+                "message": "This auction was not found! Please check manually below"
+            })
 
     # if auction does not exit, forward to index Django will raise a DoesNotExist exception.!!!!!
     
