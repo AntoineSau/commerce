@@ -1,4 +1,5 @@
 from ast import Try
+from pyexpat import model
 from shutil import get_archive_formats
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
@@ -104,20 +105,25 @@ def auction(request, auction_id):
             auctionnumber = int(auction_id)
             comments = Comment.objects.filter(auctionid=auction_id)
 
-            newbid = request.POST["bid"]
-            currentuserid = request.user
-            currentuserid = currentuserid.id
-            currentuserid = User.objects.get(id=currentuserid)
-            newbidtosave = Bid(auctionid=auction, userid=currentuserid, bid=newbid)
-            newbidtosave.save()
+            # Updating new comment is there is one in post method:
 
-            #Retrieving the current highest bid for this item! ERROR
+            if 'comment' in request.POST:
 
-            nobid = None
-            auction_id = int(auction_id)
-            highestbid = None
+                # Updating comments if there is one:
+            
+                comment = request.POST["comment"]
+                currentuserid = request.user
+                currentuserid = currentuserid.id
+                currentuserid = User.objects.get(id=currentuserid)
+                newcommenttosave = Comment(auctionid=auction, userid=currentuserid, comment=comment)
+                newcommenttosave.save()
 
-            try: 
+                # Save cofnriamtion message if comment has been uploaded
+                commentsubmitted = "Your comment has been submitted, thank you!"
+
+                # Pulling once again all comment inclduign the new one:
+                comments = Comment.objects.filter(auctionid=auction_id)
+
                 highestbid = Bid.objects.filter(auctionid=auction_id)
                 # Taking only the highest one
                 highestbid = highestbid.order_by('-bid').first
@@ -126,21 +132,52 @@ def auction(request, auction_id):
                     "auction": auction,
                     "highestbid": highestbid,
                     "comments": comments,
-                    "nobid": nobid,
                     "auction_id": auction_id,
-                    "newbid": newbid
+                    "commentsubmitted": commentsubmitted
                 })
+                
+            else:
+                newbid = request.POST["bid"]
+                currentuserid = request.user
+                currentuserid = currentuserid.id
+                currentuserid = User.objects.get(id=currentuserid)
+                newbidtosave = Bid(auctionid=auction, userid=currentuserid, bid=newbid)
+                newbidtosave.save()
+            
+            
 
-            #except Bid.DoesNotExist:
-            except not Bid.objects.filter(auctionid=auction_id):
-                nobid = 1
+                #Retrieving the current highest bid for this item! 
 
-                return render(request, "auctions/auction.html", {
-                    "auction": auction,
-                    "comments": comments,
-                    "nobid": nobid,
-                    "auction_id": auction_id
-                })
+                nobid = None
+                auction_id = int(auction_id)
+                highestbid = None
+
+                
+
+                try: 
+                    highestbid = Bid.objects.filter(auctionid=auction_id)
+                    # Taking only the highest one
+                    highestbid = highestbid.order_by('-bid').first
+
+                    return render(request, "auctions/auction.html", {
+                        "auction": auction,
+                        "highestbid": highestbid,
+                        "comments": comments,
+                        "nobid": nobid,
+                        "auction_id": auction_id,
+                        "newbid": newbid
+                    })
+
+                #except Bid.DoesNotExist:
+                except not Bid.objects.filter(auctionid=auction_id):
+                    nobid = 1
+
+                    return render(request, "auctions/auction.html", {
+                        "auction": auction,
+                        "comments": comments,
+                        "nobid": nobid,
+                        "auction_id": auction_id
+                    })
             
 
         # If the auction doesn't exist, return Index page but with error message
@@ -198,6 +235,3 @@ def auction(request, auction_id):
                 "auctions": Auction.objects.all(),
                 "message": "This auction was not found! Please check manually below"
             })
-    
-
-        
