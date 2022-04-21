@@ -15,6 +15,7 @@ from .models import Bid, User, Auction, Comment
 def index(request):
     return render(request, "auctions/index.html", {
         "auctions": Auction.objects.all(),
+
     })
 
 
@@ -105,8 +106,7 @@ def auction(request, auction_id):
             auctionnumber = int(auction_id)
             comments = Comment.objects.filter(auctionid=auction_id)
 
-            # Updating new comment is there is one in post method:
-
+            # CHECK IF THERE IS A COMMENT IN POST METHOD FIRST
             if 'comment' in request.POST:
 
                 # Updating comments if there is one:
@@ -135,29 +135,33 @@ def auction(request, auction_id):
                     "auction_id": auction_id,
                     "commentsubmitted": commentsubmitted
                 })
+            
+            # IF NO COMMENT, CHECK FOR NEW BID
+            elif 'bid' in request.POST:
                 
-            else:
                 newbid = request.POST["bid"]
+                newbid = int(newbid)
+
                 currentuserid = request.user
                 currentuserid = currentuserid.id
                 currentuserid = User.objects.get(id=currentuserid)
-                newbidtosave = Bid(auctionid=auction, userid=currentuserid, bid=newbid)
-                newbidtosave.save()
-            
-            
+                auction_id = int(auction_id)
 
-                #Retrieving the current highest bid for this item! 
+                auctiondbid = auction.startingbid
+                auctiondbid = int(auctiondbid)
 
                 nobid = None
                 auction_id = int(auction_id)
-                highestbid = None
-
+                highestbid = Bid.objects.filter(auctionid=auction_id)
+                # Taking only the highest one
+                highestbid = highestbid.order_by('-bid').first
                 
+                
+                if newbid > auctiondbid:
 
-                try: 
-                    highestbid = Bid.objects.filter(auctionid=auction_id)
-                    # Taking only the highest one
-                    highestbid = highestbid.order_by('-bid').first
+                    newbidtosave = Bid(auctionid=auction, userid=currentuserid, bid=newbid)
+                    newbidtosave.save()
+                    answerok = "Your bid has been registered, thank you!"
 
                     return render(request, "auctions/auction.html", {
                         "auction": auction,
@@ -165,20 +169,27 @@ def auction(request, auction_id):
                         "comments": comments,
                         "nobid": nobid,
                         "auction_id": auction_id,
-                        "newbid": newbid
+                        "newbid": newbid,
+                        "answerok": answerok
                     })
 
-                #except Bid.DoesNotExist:
-                except not Bid.objects.filter(auctionid=auction_id):
-                    nobid = 1
-
+                else:
+                    answerno = "Please place a higher bid"
                     return render(request, "auctions/auction.html", {
                         "auction": auction,
+                        "highestbid": highestbid,
                         "comments": comments,
                         "nobid": nobid,
-                        "auction_id": auction_id
+                        "auction_id": auction_id,
+                        "newbid": newbid,
+                        "answerno": answerno
                     })
             
+            else:
+                return render(request, "auctions/index.html", {
+                    "auctions": Auction.objects.all(),
+                    "message": "Please fill one of the fields and submit it"
+                })
 
         # If the auction doesn't exist, return Index page but with error message
         except Auction.DoesNotExist:
