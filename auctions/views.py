@@ -9,13 +9,23 @@ from django.urls import reverse
 from datetime import datetime
 from django.db.models import Max
 
-from .models import Bid, User, Auction, Comment
+from .models import Bid, User, Auction, Comment, Category
 
 
 def index(request):
+
+    # TO DO Need to pass in the highest bid for all auctions
+    bids = Bid.objects.all()
+    
     return render(request, "auctions/index.html", {
         "auctions": Auction.objects.all(),
+        "bids": bids
+    })
 
+def categories(request):
+
+    return render(request, "auctions/categories.html", {
+        "categorys": Category.objects.all()
     })
 
 
@@ -85,7 +95,7 @@ def createlisting(request):
         newcategory = request.POST["category"]
 
         # Save user listing in database, @ Auction Model, only with mandatory fields
-        newauction = Auction(userid=currentuserid, title=newtitle, description=newdescription, startingbid=newstartingbid, image=newimageurl, category=newcategory)
+        newauction = Auction(userid=currentuserid, title=newtitle, description=newdescription, startingbid=newstartingbid, highestbid=newstartingbid, image=newimageurl, category=newcategory)
         newauction.save()
 
         return render(request, "auctions/index.html", {
@@ -118,7 +128,7 @@ def auction(request, auction_id):
                 newcommenttosave = Comment(auctionid=auction, userid=currentuserid, comment=comment)
                 newcommenttosave.save()
 
-                # Save cofnriamtion message if comment has been uploaded
+                # Save confirmation message if comment has been uploaded
                 commentsubmitted = "Your comment has been submitted, thank you!"
 
                 # Pulling once again all comment inclduign the new one:
@@ -154,36 +164,79 @@ def auction(request, auction_id):
                 auction_id = int(auction_id)
                 highestbid = Bid.objects.filter(auctionid=auction_id)
                 # Taking only the highest one
-                highestbid = highestbid.order_by('-bid').first
+                highestbid = highestbid.order_by('-bid')
+                highestbid = highestbid.first()
                 
                 
-                if newbid > auctiondbid:
+                if highestbid is not None:
+                    highestbid = highestbid.bid
+                    if newbid > highestbid:
 
-                    newbidtosave = Bid(auctionid=auction, userid=currentuserid, bid=newbid)
-                    newbidtosave.save()
-                    answerok = "Your bid has been registered, thank you!"
+                        newbidtosave = Bid(auctionid=auction, userid=currentuserid, bid=newbid)
+                        newbidtosave.save()
 
-                    return render(request, "auctions/auction.html", {
-                        "auction": auction,
-                        "highestbid": highestbid,
-                        "comments": comments,
-                        "nobid": nobid,
-                        "auction_id": auction_id,
-                        "newbid": newbid,
-                        "answerok": answerok
+                        # Udpate only hisghestbid field @ Auctions
+                        auction = Auction.objects.get(id=auction_id)
+                        auction.highestbid = newbid
+                        auction.save()
+
+                        answerok = "Your bid has been registered, thank you!"
+                        # Query agian the highest bid to show it again
+                        highestbid = newbidtosave
+                        return render(request, "auctions/auction.html", {
+                            "auction": auction,
+                            "highestbid": highestbid,
+                            "comments": comments,
+                            "nobid": nobid,
+                            "auction_id": auction_id,
+                            "newbid": newbid,
+                            "answerok": answerok
                     })
 
-                else:
-                    answerno = "Please place a higher bid"
-                    return render(request, "auctions/auction.html", {
-                        "auction": auction,
-                        "highestbid": highestbid,
-                        "comments": comments,
-                        "nobid": nobid,
-                        "auction_id": auction_id,
-                        "newbid": newbid,
-                        "answerno": answerno
+                    else:
+                        answerno = "Please place a higher bid. It must be higher than the initial bid and any other additional bid!"
+                        highestbid = Bid.objects.filter(auctionid=auction_id)
+                        # Query agian the highest bid to show it again
+                        highestbid = highestbid.order_by('-bid').first
+                        return render(request, "auctions/auction.html", {
+                            "auction": auction,
+                            "highestbid": highestbid,
+                            "comments": comments,
+                            "nobid": nobid,
+                            "auction_id": auction_id,
+                            "newbid": newbid,
+                            "answerno": answerno
+                        })
+
+                else:    
+
+                    if newbid > auctiondbid:
+
+                        newbidtosave = Bid(auctionid=auction, userid=currentuserid, bid=newbid)
+                        newbidtosave.save()
+                        answerok = "Your bid has been registered, thank you!"
+                        highestbid = newbidtosave
+                        return render(request, "auctions/auction.html", {
+                            "auction": auction,
+                            "highestbid": highestbid,
+                            "comments": comments,
+                            "nobid": nobid,
+                            "auction_id": auction_id,
+                            "newbid": newbid,
+                            "answerok": answerok
                     })
+
+                    else:
+                        answerno = "Please place a higher bid"
+                        return render(request, "auctions/auction.html", {
+                            "auction": auction,
+                            "highestbid": highestbid,
+                            "comments": comments,
+                            "nobid": nobid,
+                            "auction_id": auction_id,
+                            "newbid": newbid,
+                            "answerno": answerno
+                        })
             
             else:
                 return render(request, "auctions/index.html", {

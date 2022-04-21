@@ -17,7 +17,8 @@ class Auction(models.Model):
     userid = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user")
     title = models.CharField(max_length=50)
     description = models.TextField(max_length=500)
-    startingbid = models.FloatField()
+    startingbid = models.FloatField(default=1)
+    highestbid = models.FloatField(default=1)
     image = models.URLField(blank=True)
     category = models.CharField(max_length=15, blank=True)
     dateuploaded = models.DateTimeField(default=datetime.now,)
@@ -43,6 +44,12 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Comment number {self.id}. Made by {self.userid} on {self.auctionid}: '{self.comment}', commented on {self.dateofbid}"
+
+class Category(models.Model):
+    category = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"Category number {self.id}: {self.category}"
 
 
 # TO DO
