@@ -16,6 +16,8 @@ def index(request):
 
     # TO DO Need to pass in the highest bid for all auctions
     bids = Bid.objects.all()
+
+    
     
     return render(request, "auctions/index.html", {
         "auctions": Auction.objects.all(),
@@ -92,7 +94,9 @@ def createlisting(request):
         newdescription = request.POST["description"]
         newstartingbid = request.POST["startingbid"]
         newimageurl = request.POST["imageurl"]
-        newcategory = request.POST["category"]
+        categoryid = request.POST["category"]
+
+        newcategory = Category.objects.get(id=categoryid)
 
         # Save user listing in database, @ Auction Model, only with mandatory fields
         newauction = Auction(userid=currentuserid, title=newtitle, description=newdescription, startingbid=newstartingbid, highestbid=newstartingbid, image=newimageurl, category=newcategory)
@@ -103,7 +107,10 @@ def createlisting(request):
         })
 
     else:
-        return render(request, "auctions/createlisting.html")
+        allvalidcategories = Category.objects.exclude(category="Uncategorized")
+        return render(request, "auctions/createlisting.html", {
+            "categorys": allvalidcategories
+        })
 
 def auction(request, auction_id):
     # POST METHOD
@@ -175,10 +182,12 @@ def auction(request, auction_id):
                         newbidtosave = Bid(auctionid=auction, userid=currentuserid, bid=newbid)
                         newbidtosave.save()
 
-                        # Udpate only hisghestbid field @ Auctions
+                        # Udpate only highestbid field @ Auctions
                         auction = Auction.objects.get(id=auction_id)
                         auction.highestbid = newbid
                         auction.save()
+
+                        # Update the highest bid for this auction @ Auciton Model!! auction.highestbid 
 
                         answerok = "Your bid has been registered, thank you!"
                         # Query agian the highest bid to show it again
@@ -214,6 +223,12 @@ def auction(request, auction_id):
 
                         newbidtosave = Bid(auctionid=auction, userid=currentuserid, bid=newbid)
                         newbidtosave.save()
+                        
+                        # Udpate only highestbid field @ Auctions
+                        auction = Auction.objects.get(id=auction_id)
+                        auction.highestbid = newbid
+                        auction.save()
+
                         answerok = "Your bid has been registered, thank you!"
                         highestbid = newbidtosave
                         return render(request, "auctions/auction.html", {

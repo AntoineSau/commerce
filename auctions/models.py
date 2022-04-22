@@ -13,6 +13,12 @@ class User(AbstractUser):
     def __str__(self):
         return f"User Name: {self.username}. User ID number: {self.id}."
 
+class Category(models.Model):
+    category = models.CharField(max_length=20, blank=True)
+
+    def __str__(self):
+        return f"Category number {self.id}: {self.category}"
+
 class Auction(models.Model):
     userid = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user")
     title = models.CharField(max_length=50)
@@ -20,7 +26,7 @@ class Auction(models.Model):
     startingbid = models.FloatField(default=1)
     highestbid = models.FloatField(default=1)
     image = models.URLField(blank=True)
-    category = models.CharField(max_length=15, blank=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="cat")
     dateuploaded = models.DateTimeField(default=datetime.now,)
     isactive = models.BooleanField(default=True)
 
@@ -45,14 +51,10 @@ class Comment(models.Model):
     def __str__(self):
         return f"Comment number {self.id}. Made by {self.userid} on {self.auctionid}: '{self.comment}', commented on {self.dateofbid}"
 
-class Category(models.Model):
-    category = models.CharField(max_length=50)
 
-    def __str__(self):
-        return f"Category number {self.id}: {self.category}"
 
 
 # TO DO
-# add "Categories" model
+# add "Categories" models
 # add category watchlist
 # Link models manay ot many

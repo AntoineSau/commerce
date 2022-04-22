@@ -40,7 +40,7 @@
                         <p></p> 
                         <!-- If the auction has a category, display it -->
                         {% if auction.category %}
-                            Category: {{ auction.category }}
+                            Category: {{ auction.category.category }}
                         <!-- If not, display a general statement -->
                         {% else %}
                             <i>Listing category was not defined by the user</i>
