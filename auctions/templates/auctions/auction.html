@@ -13,6 +13,12 @@
 
     -->
 
+<!-- Internal check close auction and watchlist -->
+{% if message %}
+<div style="color: blue;">{{ message }}</div>
+<p></p>
+{% endif %}
+
     <!-- Display the auction's content -->
 <div class="border border-secondary rounded">
     <div class="container">
@@ -62,6 +68,15 @@
                 <!-- Check if bid if uploaded by logged in user -->
                 {% if auction.userid.username == user.username %}
                     Uploaded by YOU!
+                    <p></p>
+                    <!-- Creating the possibility to close the auction -->
+                    <form action="{% url 'auction' auction.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <input type="hidden" name="closeauction">                        
+                        </div>
+                    <input class="btn btn-danger" type="submit" value="Close this auction">
+                    </form> 
                 {% else %}
                     Uploaded by "{{ auction.userid.username }}"
                 {% endif %}

@@ -10,6 +10,14 @@
      <div style="color: red;">{{ message }}</div>
      <p></p>
     {% endif %}
+
+    <!-- Message saying that the auciton has been closed -->
+    {% if messageauctionclosed %}
+     <div style="color: green;">{{ message }}</div>
+     <p></p>
+    {% endif %}
+
+
    
     <!-- Looping over all auctions and display their content-->
     {% for auction in auctions %}

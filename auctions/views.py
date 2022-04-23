@@ -17,12 +17,11 @@ from .models import Bid, User, Auction, Comment, Category
 
 def index(request):
 
-    # TO DO Need to pass in the highest bid for all auctions
-    bids = Bid.objects.all()
+    # Passing in the highest bid for all auctions
     return render(request, "auctions/index.html", {
         # Only taking into account ACTIVE products!
         "auctions": Auction.objects.filter(isactive=True),
-        "bids": bids
+        "bids":  Bid.objects.all()
     })
 
 @login_required(login_url='login')
@@ -108,7 +107,8 @@ def createlisting(request):
         newauction.save()
 
         return render(request, "auctions/index.html", {
-            "auctions": Auction.objects.all()
+            "auctions": Auction.objects.filter(isactive=True),
+            "bids":  Bid.objects.all()
         })
 
     else:
@@ -123,7 +123,9 @@ def category(request, category):
     try:
         categoryid = Category.objects.get(category=category)
         categoryid = categoryid.id
-        categoryproducts = Auction.objects.filter(category=categoryid)
+        categoryproducts = Auction.objects.filter(category=categoryid, isactive=True)
+        # Making sure we onyl dispaly ACTIVE products of this category
+
         return render(request, "auctions/category.html", {
             "categoryproducts": categoryproducts,
             "categoryid": categoryid,
@@ -148,6 +150,26 @@ def auction(request, auction_id):
             auctionnumber = int(auction_id)
             comments = Comment.objects.filter(auctionid=auction_id)
 
+            # Check if user wants to add this items to watchlist / addtowatchlist
+            if 'addtowatchlist' in request.POST:
+                return render(request, "auctions/auction.html", {
+                    "auction": auction,
+                    "comments": comments,
+                    "auction_id": auction_id,
+                    "message": "User wants to add to watchlist"
+                })
+            
+            # Check if user wants to close this auction / closeauction
+            if 'closeauction' in request.POST:
+                auction = Auction.objects.get(id=auction_id)
+                auction.isactive = False
+                auction.save()
+                return render(request, "auctions/index.html", {
+                    "auctions": Auction.objects.filter(isactive=True),
+                    "bids":  Bid.objects.all(),
+                    "messageauctionclosed": "You have closed this auction."
+                })
+            
             # CHECK IF THERE IS A COMMENT IN POST METHOD FIRST
             if 'comment' in request.POST:
 
@@ -280,14 +302,16 @@ def auction(request, auction_id):
             
             else:
                 return render(request, "auctions/index.html", {
-                    "auctions": Auction.objects.all(),
+                    "auctions": Auction.objects.filter(isactive=True),
+                    "bids":  Bid.objects.all(),
                     "message": "Please fill one of the fields and submit it"
                 })
 
         # If the auction doesn't exist, return Index page but with error message
         except Auction.DoesNotExist:
             return render(request, "auctions/index.html", {
-                "auctions": Auction.objects.all(),
+                "auctions": Auction.objects.filter(isactive=True),
+                "bids":  Bid.objects.all(),
                 "message": "This auction was not found! Please check manually below"
             })
 
@@ -336,6 +360,7 @@ def auction(request, auction_id):
         # If the auction doesn't exist, return Index page but with error message
         except Auction.DoesNotExist:
             return render(request, "auctions/index.html", {
-                "auctions": Auction.objects.all(),
-                "message": "This auction was not found! Please check manually below"
+                "auctions": Auction.objects.filter(isactive=True),
+                "bids":  Bid.objects.all(),
+                "messageok": "This auction was not found! Please check manually below"
             })
