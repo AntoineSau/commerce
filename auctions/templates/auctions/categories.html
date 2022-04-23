@@ -1,0 +1,19 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Categories</h2>
+    <p></p>
+    Click on one of the categories below to see all products listed within this category:
+
+    {% if message %}
+     <div style="color: red;">{{ message }}</div>
+     <p></p>
+    {% endif %}
+    
+    {% for category in categorys %}
+        <li><a href="{% url 'category' category.category %}">{{ category.category }}</a></li>
+    {% empty %}
+        <li>There are currently no category!</li>
+    {% endfor %}
+
+{% endblock %}

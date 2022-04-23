@@ -1,0 +1,55 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Create a new listing</h2>
+    <p></p>
+
+    <!-- Creating a form to collect data from user on listing that needs to be udpated -->
+    <form action="{% url 'createlisting' %}" method="post">
+        {% csrf_token %}
+        <b>Mandatory fields:</b><p></p>
+        <div class="form-group">
+            <input autofocus class="form-control" type="text" name="title" placeholder="Title" required>
+        </div>
+        <div class="form-group">
+            <input autofocus class="form-control" type="text" name="description" placeholder="Decription" required>
+        </div>
+        <div class="form-group">
+            <input autofocus class="form-control" type="number" step="0.01" name="startingbid" placeholder="Starting Bid" required>
+        </div>
+
+        <i>Optional fields:</i>
+        <p></p>
+        <div class="form-group">
+            <input autofocus class="form-control" type="url" name="imageurl" placeholder="Url of the image (optional)">
+        </div>
+        Choose a category
+        <!-- By default the user will chose uncategorized, which give an imrpession of optional field :) -->
+        <select name="category" id="category">
+                <option value="4"> - Select a category (Optional) - </option>
+            {% for category in categorys %}
+                <option value="{{ category.id }}">{{ category.category }}</option>
+            {% endfor %}
+        </select>
+        <p></p>
+        <input class="btn btn-primary" type="submit" value="Create this listing">
+    </form>
+    <!-- Test prints (Back-up)
+    <p></p>
+    / Test print /
+    <p></p>
+    User is: {{ user.username }}. Id is {{ user.id }}
+    <p></p>
+    Title is: {{ title }}
+    <p></p>
+    Description is: {{ description }}
+    <p></p>
+    Starting Bid is: {{ startingbid }}
+    <p></p>
+    Img Url is: {{ imageurl }}
+    <p></p>
+    Category is: {{ category }}
+    <p></p>
+    -->
+
+{% endblock %}

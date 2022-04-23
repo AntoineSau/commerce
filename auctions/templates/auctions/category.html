@@ -1,0 +1,57 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Product from category {{ category }}</h2>
+
+    <p></p>
+
+    {% if categoryproducts %}
+        We found the following list:
+        {% for categoryproduct in categoryproducts %}
+            <!-- Back up <li>{{ categoryproduct.title }}</li>
+
+         TODO: dipaly aucitons properly,not only title! -->
+            <!-- Diplaying with format the auctions from this category. Category fiedd is deleted, in opposition from INDEX page -->
+        <div class="border border-secondary rounded">
+            <div class="container">
+                <div class="row">
+                    <!-- "Left side" -->
+                    <div class="col-4">
+                        <!-- Display auction's image if it exists -->
+                        {% if categoryproduct.image %}
+                            <img src="{{ categoryproduct.image }}" alt="Image for {{ categoryproduct.title }}" style="height: 100%; width: 100%; object-fit: contain">
+                        <!-- Display "missing image" image if auciton does´t have image -->
+                        {% else %}
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg " alt="No Image here" style="height: 100%; width: 100%; object-fit: contain">
+                        {% endif %}
+                    </div>
+                    <!-- "Right side" -->
+                    <div class="col-8">
+                        <!-- Displaying title with link to the auction's page -->
+                        <h1><a href="{% url 'auction' categoryproduct.id %}">{{ categoryproduct.title }}</a></h1>
+                        <p></p>
+                        <p></p>
+                        <b>Current price: {{ categoryproduct.highestbid }} Euros.</b>
+                        <p></p> 
+                        <i> The starting bid for this items was {{ categoryproduct.startingbid }} Euros.</i> 
+                        
+                        <p></p>
+
+                        Uploaded by "{{ categoryproduct.userid.username }}"
+                        <p></p>
+                        Item description: <i>{{ categoryproduct.description }}</i>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p></p>
+
+        {% endfor %}
+    {% else %}
+        Error: we didn't find any product with the category "{{ category }}"
+    {% endif %}
+    
+    <p></p>
+    <!-- Print backup Category id is {{ categoryid }} -->
+{% endblock %}

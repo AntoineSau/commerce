@@ -1,0 +1,151 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Auction</h2>
+    <p></p>
+    <!-- CHECK PRINT to see who is logged in and who posted this auction
+    
+    <p></p>
+    auction.userid.username -> {{ auction.userid.username }}
+    <p></p> 
+    user.username -> {{ user.username }}
+    <p></p>
+
+    -->
+
+    <!-- Display the auction's content -->
+<div class="border border-secondary rounded">
+    <div class="container">
+        <div class="row">
+            <!-- "Left side" -->
+            <div class="col-4">
+                <!-- Display auction's image if it exists -->
+                {% if auction.image %}
+                    <img src="{{ auction.image }}" alt="Image for {{ auction.title }}" style="height: 100%; width: 100%; object-fit: contain">
+                <!-- Display "missing image" image if auciton does´t have image -->
+                {% else %}
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg " alt="No Image here" style="height: 100%; width: 100%; object-fit: contain">
+                {% endif %}
+            </div>
+            <!-- "Right Side" -->
+            <div class="col-8">
+                <h1><b>{{ auction.title }}</b></h1>
+                <p></p>
+                <!-- If user is logged in (ALL USERS), add possibility to add the item to watch list -->
+                
+                <!-- TODO: IS THE ITEM ALREADY IN WATCHLIST YES, able to delete!-->
+
+                {% if user.is_authenticated %}
+                    <form action="{% url 'auction' auction.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <input type="hidden" name="addtowatchlist">
+                        </div>
+                        <input class="btn btn-primary" type="submit" value="Add item to watchlist">
+                    </form> 
+                {% else %}
+                    <i>You need to  <a href="{% url 'login' %}">log in</a> in order to add this item to your washlist!</i>
+                {% endif %}
+                            
+                <p></p>
+                
+                <!-- If the auction has a category, display it -->
+                {% if auction.category %}
+                    Category: {{ auction.category }}
+                <!-- If not, display a general statement -->
+                {% else %}
+                   <i>Listing category was not defined by the user</i>
+                <!-- Close if loop -->
+                {% endif %}
+                <p></p>
+
+                <!-- Check if bid if uploaded by logged in user -->
+                {% if auction.userid.username == user.username %}
+                    Uploaded by YOU!
+                {% else %}
+                    Uploaded by "{{ auction.userid.username }}"
+                {% endif %}
+                            
+                <p></p>
+                Item description: <i>{{ auction.description }}</i>
+                <p></p>
+                Initial bid: <b>{{ auction.startingbid }} Euros</b>   
+                <p></p>
+
+                {% if highestbid %}
+                Current price: <b>{{ highestbid.bid }} Euros </b>
+                <p></p>
+                {% else %}
+                No one else placed any additional bid so far!
+                <p></p>
+                {% endif %}
+                <p></p>
+                
+                <!-- Test print comparing bids -->
+                {% if answerok %}
+                    <div style="color: green;"> {{ answerok }}</div>
+                <p></p>
+                {% elif answerno %}
+                    <div style="color: red;"> {{ answerno }}</div>
+                <p></p>
+                {% endif %}
+
+                <!-- Let user place bid if they are logged in -->
+                {% if user.is_authenticated %}
+                    <form action="{% url 'auction' auction.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <input autofocus class="form-control" type="number" step="0.01" name="bid" placeholder="Your Bid (Please type a number)"required>
+                        </div>
+                    <input class="btn btn-primary" type="submit" value="Add a Bid">
+                    </form>  
+                {% else %}
+                    <i>You need to  <a href="{% url 'login' %}">log in</a> in order to place a bid on this item!</i>
+                {% endif %}
+                <p></p>
+
+                <!-- TESTPRINTS
+                newbid: {{ newbid }} / Highest big: {{ highestbid.bid }} / Original Bid: {{ auction.startingbid }}
+                -->
+
+                <!-- If new comments has been submitted, confirm it to the user -->
+                {% if commentsubmitted %}
+                <div style="color: green;"> {{ commentsubmitted }}</div>
+                <p></p>
+                {% endif %}
+                
+                <!-- Let user place bid if they are logged in -->
+                {% if user.is_authenticated %}
+                    <form action="{% url 'auction' auction.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <input autofocus class="form-control" type="text" name="comment" placeholder="Type your comment here" required>
+                        </div>
+                    <input class="btn btn-primary" type="submit" value="Submit your comment">
+                    </form>  
+                {% else %}
+                    <i>You need to  <a href="{% url 'login' %}">log in</a> in order to place a comment on this item!</i>
+                {% endif %}
+                <p></p>    
+
+            </div>
+        </div>
+    </div>
+</div>
+<p></p>
+Check the comments posted on this auction:
+<p></p>
+<!-- Loop above comments and display them -->
+{% for comment in comments %}
+    -> <i>By {{ comment.userid.username }}:</i> {{ comment.comment }}. Posted: {{ comment.dateofbid }}
+    <p></p>
+<!-- Manage case of NO comment -->
+{% empty %}   
+<i>There are no comments for this auction, please feel free to share one above!</i>
+<!-- End Loop -->
+{% endfor %}
+
+<p></p>
+Click <a href="{% url 'index'  %}">here</a> to go back to the Homepage
+
+{% endblock %}
