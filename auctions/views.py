@@ -12,7 +12,7 @@ from datetime import datetime
 from django.db.models import Max
 from django.contrib.auth.decorators import login_required
 
-from .models import Bid, User, Auction, Comment, Category
+from .models import Bid, User, Auction, Comment, Category, Watchlist
 
 
 def index(request):
@@ -147,16 +147,23 @@ def auction(request, auction_id):
         try:
             auction = Auction.objects.get(id=auction_id)
             # Retrieving all the comments for this auction
-            auctionnumber = int(auction_id)
             comments = Comment.objects.filter(auctionid=auction_id)
 
             # Check if user wants to add this items to watchlist / addtowatchlist
             if 'addtowatchlist' in request.POST:
+                
+                currentuserid = request.user
+                currentuserid = currentuserid.id
+                currentuserid = User.objects.get(id=currentuserid)
+                # Add this itme to this user´s watchlist
+                addtowatchlist = Watchlist(userwatching=currentuserid, productwatched=auction)
+                addtowatchlist.save()
+
                 return render(request, "auctions/auction.html", {
                     "auction": auction,
                     "comments": comments,
                     "auction_id": auction_id,
-                    "message": "User wants to add to watchlist"
+                    "message": "Added to watchlist"
                 })
             
             # Check if user wants to close this auction / closeauction
