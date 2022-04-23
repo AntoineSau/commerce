@@ -51,8 +51,12 @@ class Comment(models.Model):
     def __str__(self):
         return f"Comment number {self.id}. Made by {self.userid} on {self.auctionid}: '{self.comment}', commented on {self.dateofbid}"
 
+class Watchlist(models.Model):
+    userwatching = models.ForeignKey(User, on_delete=models.CASCADE, related_name="watching")
+    productwatched  = models.ForeignKey(Auction, on_delete=models.CASCADE, related_name="wacthed")
 
-
+    def __str__(self):
+        return f"User '{self.userwatching}' is watching item '{self.productwatched}' (id={self.id})"
 
 # TO DO
 # add "Categories" models
