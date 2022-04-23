@@ -14,7 +14,7 @@ class User(AbstractUser):
         return f"User Name: {self.username}. User ID number: {self.id}."
 
 class Category(models.Model):
-    category = models.CharField(max_length=20)
+    category = models.CharField(max_length=20, default="Uncategorized")
 
     def __str__(self):
         return f"Category number {self.id}: {self.category}"

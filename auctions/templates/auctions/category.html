@@ -1,12 +1,13 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Product from category {{ category }}</h2>
+    <h2>Product from category "{{ category }}"</h2>
 
     <p></p>
 
     {% if categoryproducts %}
-        We found the following list:
+        We found the following list of product in this category:
+        <p></p>
         {% for categoryproduct in categoryproducts %}
             <!-- Back up <li>{{ categoryproduct.title }}</li>
 

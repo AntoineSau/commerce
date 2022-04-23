@@ -10,6 +10,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from datetime import datetime
 from django.db.models import Max
+from django.contrib.auth.decorators import login_required
 
 from .models import Bid, User, Auction, Comment, Category
 
@@ -18,20 +19,22 @@ def index(request):
 
     # TO DO Need to pass in the highest bid for all auctions
     bids = Bid.objects.all()
-
-    
-    
     return render(request, "auctions/index.html", {
-        "auctions": Auction.objects.all(),
+        # Only taking into account ACTIVE products!
+        "auctions": Auction.objects.filter(isactive=True),
         "bids": bids
     })
 
-def categories(request):
+@login_required(login_url='login')
+def watchlist(request):
+    return render(request, "auctions/watchlist.html", {
+        "auctions": Auction.objects.all()
+    })
 
+def categories(request):
     return render(request, "auctions/categories.html", {
         "categorys": Category.objects.all()
     })
-
 
 def login_view(request):
     if request.method == "POST":
@@ -85,7 +88,7 @@ def register(request):
         return render(request, "auctions/register.html")
 
 # Adding a nre view for user to create a new listing
-
+@login_required(login_url='login')
 def createlisting(request):
     if request.method == "POST":
         # Retrieving data from the user / user passed in automatically as {{ user }} / {{ user.id }}
