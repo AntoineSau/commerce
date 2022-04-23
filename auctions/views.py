@@ -1,6 +1,8 @@
 from ast import Try
+from nis import cat
 from pyexpat import model
 from shutil import get_archive_formats
+from sre_constants import CATEGORY
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
@@ -111,6 +113,26 @@ def createlisting(request):
         return render(request, "auctions/createlisting.html", {
             "categorys": allvalidcategories
         })
+
+def category(request, category):
+    category = str(category)
+    # Check if the category exists or not
+    try:
+        categoryid = Category.objects.get(category=category)
+        categoryid = categoryid.id
+        categoryproducts = Auction.objects.filter(category=categoryid)
+        return render(request, "auctions/category.html", {
+            "categoryproducts": categoryproducts,
+            "categoryid": categoryid,
+            "category": category
+            })
+    except Category.DoesNotExist:
+        
+        return render(request, "auctions/categories.html", {
+            "categorys": Category.objects.all(),
+            "message": "This Category was not found! Please choose from the list below"
+        })
+
 
 def auction(request, auction_id):
     # POST METHOD
