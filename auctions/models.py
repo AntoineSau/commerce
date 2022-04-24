@@ -31,7 +31,7 @@ class Auction(models.Model):
     isactive = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"{self.title}. Category: {self.category}. Starting bid: {self.startingbid} Euros"
+        return f"{self.title}. Category: {self.category}. Starting bid: {self.startingbid} Euros. isactive is {self.isactive} (Auctionid = {self.id})"
 
 class Bid(models.Model):
     auctionid = models.ForeignKey(Auction, on_delete=models.CASCADE, related_name="bidauction")

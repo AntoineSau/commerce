@@ -26,8 +26,14 @@ def index(request):
 
 @login_required(login_url='login')
 def watchlist(request):
+    # Retrieve user's data
+    currentuserid = request.user
+    currentuserid = currentuserid.id
     return render(request, "auctions/watchlist.html", {
-        "auctions": Auction.objects.all()
+        "auctions": Auction.objects.all(),
+        "watchlistsall": Watchlist.objects.all(),
+        "userwatcheditems": Watchlist.objects.filter(userwatching=currentuserid),
+        "currentuserid": currentuserid
     })
 
 def categories(request):
@@ -149,21 +155,47 @@ def auction(request, auction_id):
             # Retrieving all the comments for this auction
             comments = Comment.objects.filter(auctionid=auction_id)
 
-            # Check if user wants to add this items to watchlist / addtowatchlist
-            if 'addtowatchlist' in request.POST:
+            # Get user id
+            currentuserid = request.user
+            currentuserid = currentuserid.id
+            currentuserid = User.objects.get(id=currentuserid)
+
+             # Is item in watchlist
+            isitemwatched = Watchlist.objects.filter(userwatching=currentuserid, productwatched=auction_id)
+
+            # Check if user wants to delete this item from watchlist / deletefromwatchlist
+            if 'deletefromwatchlist' in request.POST:
                 
-                currentuserid = request.user
-                currentuserid = currentuserid.id
-                currentuserid = User.objects.get(id=currentuserid)
                 # Add this itme to this user´s watchlist
-                addtowatchlist = Watchlist(userwatching=currentuserid, productwatched=auction)
-                addtowatchlist.save()
+                deletefromwatchlist = Watchlist.objects.filter(userwatching=currentuserid, productwatched=auction)
+                deletefromwatchlist.delete()
+
 
                 return render(request, "auctions/auction.html", {
                     "auction": auction,
                     "comments": comments,
                     "auction_id": auction_id,
-                    "message": "Added to watchlist"
+                    "currentuserid": currentuserid,
+                    "isitemwatched": isitemwatched,
+                    "message": "Item deleted from watchlist"
+                })
+
+
+            # Check if user wants to add this item to watchlist / addtowatchlist
+            if 'addtowatchlist' in request.POST:
+                
+                # Add this itme to this user´s watchlist
+                addtowatchlist = Watchlist(userwatching=currentuserid, productwatched=auction)
+                addtowatchlist.save()
+
+
+                return render(request, "auctions/auction.html", {
+                    "auction": auction,
+                    "comments": comments,
+                    "auction_id": auction_id,
+                    "currentuserid": currentuserid,
+                    "isitemwatched": isitemwatched,
+                    "message": "Item added to watchlist"
                 })
             
             # Check if user wants to close this auction / closeauction
@@ -174,6 +206,7 @@ def auction(request, auction_id):
                 return render(request, "auctions/index.html", {
                     "auctions": Auction.objects.filter(isactive=True),
                     "bids":  Bid.objects.all(),
+                    "isitemwatched": isitemwatched,
                     "messageauctionclosed": "You have closed this auction."
                 })
             
@@ -183,9 +216,6 @@ def auction(request, auction_id):
                 # Updating comments if there is one:
             
                 comment = request.POST["comment"]
-                currentuserid = request.user
-                currentuserid = currentuserid.id
-                currentuserid = User.objects.get(id=currentuserid)
                 newcommenttosave = Comment(auctionid=auction, userid=currentuserid, comment=comment)
                 newcommenttosave.save()
 
@@ -204,6 +234,8 @@ def auction(request, auction_id):
                     "highestbid": highestbid,
                     "comments": comments,
                     "auction_id": auction_id,
+                    "currentuserid": currentuserid,
+                    "isitemwatched": isitemwatched,
                     "commentsubmitted": commentsubmitted
                 })
             
@@ -213,9 +245,6 @@ def auction(request, auction_id):
                 newbid = request.POST["bid"]
                 newbid = int(newbid)
 
-                currentuserid = request.user
-                currentuserid = currentuserid.id
-                currentuserid = User.objects.get(id=currentuserid)
                 auction_id = int(auction_id)
 
                 auctiondbid = auction.startingbid
@@ -252,7 +281,9 @@ def auction(request, auction_id):
                             "comments": comments,
                             "nobid": nobid,
                             "auction_id": auction_id,
+                            "currentuserid": currentuserid,
                             "newbid": newbid,
+                            "isitemwatched": isitemwatched,
                             "answerok": answerok
                     })
 
@@ -267,7 +298,9 @@ def auction(request, auction_id):
                             "comments": comments,
                             "nobid": nobid,
                             "auction_id": auction_id,
+                            "currentuserid": currentuserid,
                             "newbid": newbid,
+                            "isitemwatched": isitemwatched,
                             "answerno": answerno
                         })
 
@@ -291,7 +324,9 @@ def auction(request, auction_id):
                             "comments": comments,
                             "nobid": nobid,
                             "auction_id": auction_id,
+                            "currentuserid": currentuserid,
                             "newbid": newbid,
+                            "isitemwatched": isitemwatched,
                             "answerok": answerok
                     })
 
@@ -303,7 +338,9 @@ def auction(request, auction_id):
                             "comments": comments,
                             "nobid": nobid,
                             "auction_id": auction_id,
+                            "currentuserid": currentuserid,
                             "newbid": newbid,
+                            "isitemwatched": isitemwatched,
                             "answerno": answerno
                         })
             
@@ -333,11 +370,21 @@ def auction(request, auction_id):
             auctionnumber = int(auction_id)
             comments = Comment.objects.filter(auctionid=auction_id)
 
-            #Retrieving the current highest bid for this item! ERROR
+            # Retrieving the current highest bid for this item! 
+
+            # Checking if the auction is open!
+            isauctionopen = auction.isactive
+
+            # Checking who is th ehighest bidder
 
             nobid = None
             auction_id = int(auction_id)
             highestbid = None
+
+            # Retrieving all the watchlist data from the user
+            currentuserid = request.user
+            currentuserid = currentuserid.id
+            isitemwatched = Watchlist.objects.filter(userwatching=currentuserid, productwatched=auction_id)
 
             try: 
                 highestbid = Bid.objects.filter(auctionid=auction_id)
@@ -349,7 +396,10 @@ def auction(request, auction_id):
                     "highestbid": highestbid,
                     "comments": comments,
                     "nobid": nobid,
-                    "auction_id": auction_id
+                    "auction_id": auction_id,
+                    "isitemwatched": isitemwatched,
+                    "currentuserid": currentuserid,
+                    "isauctionopen": isauctionopen
                 })
 
             #except Bid.DoesNotExist:
@@ -360,7 +410,10 @@ def auction(request, auction_id):
                     "auction": auction,
                     "comments": comments,
                     "nobid": nobid,
-                    "auction_id": auction_id
+                    "auction_id": auction_id,
+                    "isitemwatched": isitemwatched,
+                    "currentuserid": currentuserid,
+                    "isauctionopen": isauctionopen
                 })
             
 
