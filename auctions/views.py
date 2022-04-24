@@ -389,7 +389,9 @@ def auction(request, auction_id):
             try: 
                 highestbid = Bid.objects.filter(auctionid=auction_id)
                 # Taking only the highest one
-                highestbid = highestbid.order_by('-bid').first
+                highestbid = highestbid.order_by('-bid')
+                highestbid = highestbid.first()
+                highestbidder = highestbid.userid
 
                 return render(request, "auctions/auction.html", {
                     "auction": auction,
@@ -399,7 +401,9 @@ def auction(request, auction_id):
                     "auction_id": auction_id,
                     "isitemwatched": isitemwatched,
                     "currentuserid": currentuserid,
-                    "isauctionopen": isauctionopen
+                    "isauctionopen": isauctionopen,
+                    "highestbid": highestbid,
+                    "highestbidder": highestbidder
                 })
 
             #except Bid.DoesNotExist:

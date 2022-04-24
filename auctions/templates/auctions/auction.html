@@ -22,8 +22,16 @@
 
 Is auction open? -> {{ isauctionopen }}
 <p></p>
-Is user the highest bidder -> 
+who made the higgest bid? -> {{ highestbid }}
 <p></p>
+Who is the highest bidder -> {{ highestbidder.id }}
+<p></p>
+Who is loggin in -> {{ user.id }}
+<p></p>
+<!-- Display is the acution is closed adn current user is the higher bidder-->
+{% if isauctionopen == False and highestbidder.id == user.id %}
+<h2 style="color: purple;">CONGRATULATIONS, YOU HAVE WON THIS AUCTION!</h2>
+{% endif %}
 
     <!-- Display the auction's content -->
 <div class="border border-secondary rounded">
@@ -94,14 +102,18 @@ Is user the highest bidder ->
                 {% if auction.userid.username == user.username %}
                     Uploaded by YOU!
                     <p></p>
-                    <!-- Creating the possibility to close the auction -->
+                    <!-- Creating the possibility to close the auction (if open) -->
+                    {% if isauctionopen == True %}
                     <form action="{% url 'auction' auction.id %}" method="post">
                         {% csrf_token %}
                         <div class="form-group">
                             <input type="hidden" name="closeauction">                        
                         </div>
                     <input class="btn btn-danger" type="submit" value="Close this auction">
-                    </form> 
+                    </form>
+                    {% else %}
+                    <b>This action is closed!</b>
+                    {% endif %}
                 {% else %}
                     Uploaded by "{{ auction.userid.username }}"
                 {% endif %}
@@ -131,14 +143,17 @@ Is user the highest bidder ->
                 {% endif %}
 
                 <!-- Let user place bid if they are logged in -->
-                {% if user.is_authenticated %}
+                {% if user.is_authenticated and isauctionopen == True %}
                     <form action="{% url 'auction' auction.id %}" method="post">
                         {% csrf_token %}
                         <div class="form-group">
                             <input autofocus class="form-control" type="number" step="0.01" name="bid" placeholder="Your Bid (Please type a number)"required>
                         </div>
                     <input class="btn btn-primary" type="submit" value="Add a Bid">
-                    </form>  
+                    </form>
+                {% elif user.is_authenticated and isauctionopen == False %}  
+                <b>You cannot bid for this auction, it is closed!</b>
+                <p></p>
                 {% else %}
                     <i>You need to  <a href="{% url 'login' %}">log in</a> in order to place a bid on this item!</i>
                 {% endif %}
