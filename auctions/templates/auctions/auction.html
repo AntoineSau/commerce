@@ -18,19 +18,21 @@
 <div style="color: green;">{{ message }}</div>
 <p></p>
 {% endif %}
-
-
+<!-- Check prints before imlmenting auction winnign advice 
 Is auction open? -> {{ isauctionopen }}
 <p></p>
+{% if highestbid %}
 who made the higgest bid? -> {{ highestbid }}
 <p></p>
 Who is the highest bidder -> {{ highestbidder.id }}
 <p></p>
+
 Who is loggin in -> {{ user.id }}
-<p></p>
-<!-- Display is the acution is closed adn current user is the higher bidder-->
+<p></p>-->
+<!-- Display is the auction is closed adn current user is the higher bidder -->
 {% if isauctionopen == False and highestbidder.id == user.id %}
 <h2 style="color: purple;">CONGRATULATIONS, YOU HAVE WON THIS AUCTION!</h2>
+{% endif %}
 {% endif %}
 
     <!-- Display the auction's content -->
@@ -90,7 +92,7 @@ Who is loggin in -> {{ user.id }}
                 
                 <!-- If the auction has a category, display it -->
                 {% if auction.category %}
-                    Category: {{ auction.category }}
+                    Category: {{ auction.category.category }}
                 <!-- If not, display a general statement -->
                 {% else %}
                    <i>Listing category was not defined by the user</i>

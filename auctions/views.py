@@ -152,6 +152,7 @@ def auction(request, auction_id):
         # We check if there is an Auction with this ID
         try:
             auction = Auction.objects.get(id=auction_id)
+            isauctionopen = auction.isactive
             # Retrieving all the comments for this auction
             comments = Comment.objects.filter(auctionid=auction_id)
 
@@ -159,6 +160,11 @@ def auction(request, auction_id):
             currentuserid = request.user
             currentuserid = currentuserid.id
             currentuserid = User.objects.get(id=currentuserid)
+
+            # Retrieve highest bid:
+            highestbid = Bid.objects.filter(auctionid=auction_id)
+            # Taking only the highest one
+            highestbid = highestbid.order_by('-bid').first
 
              # Is item in watchlist
             isitemwatched = Watchlist.objects.filter(userwatching=currentuserid, productwatched=auction_id)
@@ -177,7 +183,9 @@ def auction(request, auction_id):
                     "auction_id": auction_id,
                     "currentuserid": currentuserid,
                     "isitemwatched": isitemwatched,
-                    "message": "Item deleted from watchlist"
+                    "message": "Item deleted from watchlist",
+                    "isauctionopen": isauctionopen,
+                    "highestbid": highestbid
                 })
 
 
@@ -195,7 +203,9 @@ def auction(request, auction_id):
                     "auction_id": auction_id,
                     "currentuserid": currentuserid,
                     "isitemwatched": isitemwatched,
-                    "message": "Item added to watchlist"
+                    "isauctionopen": isauctionopen,
+                    "message": "Item added to watchlist",
+                    "highestbid": highestbid
                 })
             
             # Check if user wants to close this auction / closeauction
@@ -207,6 +217,8 @@ def auction(request, auction_id):
                     "auctions": Auction.objects.filter(isactive=True),
                     "bids":  Bid.objects.all(),
                     "isitemwatched": isitemwatched,
+                    "isauctionopen": isauctionopen,
+                    "highestbid": highestbid,
                     "messageauctionclosed": "You have closed this auction."
                 })
             
@@ -236,19 +248,20 @@ def auction(request, auction_id):
                     "auction_id": auction_id,
                     "currentuserid": currentuserid,
                     "isitemwatched": isitemwatched,
-                    "commentsubmitted": commentsubmitted
+                    "commentsubmitted": commentsubmitted,
+                    "isauctionopen": isauctionopen,
                 })
             
             # IF NO COMMENT, CHECK FOR NEW BID
             elif 'bid' in request.POST:
                 
                 newbid = request.POST["bid"]
-                newbid = int(newbid)
+                newbid = float(newbid)
 
                 auction_id = int(auction_id)
 
                 auctiondbid = auction.startingbid
-                auctiondbid = int(auctiondbid)
+                auctiondbid = float(auctiondbid)
 
                 nobid = None
                 auction_id = int(auction_id)
@@ -284,6 +297,7 @@ def auction(request, auction_id):
                             "currentuserid": currentuserid,
                             "newbid": newbid,
                             "isitemwatched": isitemwatched,
+                            "isauctionopen": isauctionopen,
                             "answerok": answerok
                     })
 
@@ -301,6 +315,7 @@ def auction(request, auction_id):
                             "currentuserid": currentuserid,
                             "newbid": newbid,
                             "isitemwatched": isitemwatched,
+                            "isauctionopen": isauctionopen,
                             "answerno": answerno
                         })
 
@@ -327,6 +342,7 @@ def auction(request, auction_id):
                             "currentuserid": currentuserid,
                             "newbid": newbid,
                             "isitemwatched": isitemwatched,
+                            "isauctionopen": isauctionopen,
                             "answerok": answerok
                     })
 
@@ -341,6 +357,7 @@ def auction(request, auction_id):
                             "currentuserid": currentuserid,
                             "newbid": newbid,
                             "isitemwatched": isitemwatched,
+                            "isauctionopen": isauctionopen,
                             "answerno": answerno
                         })
             
@@ -348,6 +365,7 @@ def auction(request, auction_id):
                 return render(request, "auctions/index.html", {
                     "auctions": Auction.objects.filter(isactive=True),
                     "bids":  Bid.objects.all(),
+                    "isauctionopen": isauctionopen,
                     "message": "Please fill one of the fields and submit it"
                 })
 
@@ -375,7 +393,7 @@ def auction(request, auction_id):
             # Checking if the auction is open!
             isauctionopen = auction.isactive
 
-            # Checking who is th ehighest bidder
+            # Checking who is the highest bidder
 
             nobid = None
             auction_id = int(auction_id)
@@ -391,7 +409,9 @@ def auction(request, auction_id):
                 # Taking only the highest one
                 highestbid = highestbid.order_by('-bid')
                 highestbid = highestbid.first()
-                highestbidder = highestbid.userid
+                highestbidder = None
+                if highestbid:
+                    highestbidder = highestbid.userid
 
                 return render(request, "auctions/auction.html", {
                     "auction": auction,
